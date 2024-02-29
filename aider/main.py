@@ -7,7 +7,10 @@ import configargparse
 import git
 import openai
 
-from aider import __version__, models
+# from aider import __version__, models
+import aider
+version = aider.__version__
+del aider
 from aider.coders import Coder
 from aider.io import InputOutput
 from aider.repo import GitRepo
