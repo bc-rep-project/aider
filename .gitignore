@@ -1,3 +1,5 @@
 # .gitignore
 .env
 config.yaml
+.aider*
+.aider.conf.yml

@@ -3,6 +3,7 @@ import json
 import requests
 from dotenv import load_dotenv
 import yaml
+import tiktoken
 
 from .base_coder import Coder
 from .editblock_coder import find_original_update_blocks  # For parsing diffs
@@ -10,6 +11,7 @@ from .editblock_coder import find_original_update_blocks  # For parsing diffs
 class HuggingFaceCoder(Coder):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.tokenizer = tiktoken.get_encoding("t5-32100")  # Replace with the appropriate tokenizer name
 
         # Load .env file
         load_dotenv()
@@ -66,7 +68,6 @@ class HuggingFaceCoder(Coder):
             if content:
                 prompt += f"{role}: {content}\n"
         return prompt
-
 
 
 
