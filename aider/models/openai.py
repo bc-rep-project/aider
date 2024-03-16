@@ -103,6 +103,15 @@ openai_models = [
         use_repo_map=True,
         send_undo_reply=True,
     ),
+    ModelInfo(
+        "mistralai/Mixtral-8x7B-Instruct-v0.1",  # Model name
+        8192,  # Max context tokens (adjust as needed)
+        0.0,  # Prompt price (if applicable)
+        0.0,  # Completion price (if applicable)
+        "diff",  # Edit format (adjust as needed)
+        use_repo_map=True,  # Enable repo map if supported
+        send_undo_reply=True,  # Enable undo reply if supported
+    ),
 ]
 
 openai_aliases = {
@@ -113,6 +122,8 @@ openai_aliases = {
     "gpt-4-turbo-preview": "gpt-4-0125-preview",
     "gpt-4": "gpt-4-0613",
     "gpt-4-32k": "gpt-4-32k-0613",
+    # Hugging Face model alias
+    "mixtral": "mistralai/Mixtral-8x7B-Instruct-v0.1",
 }
 
 

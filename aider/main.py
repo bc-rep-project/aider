@@ -13,6 +13,7 @@ from aider.coders import Coder
 from aider.io import InputOutput
 from aider.repo import GitRepo
 from aider.versioncheck import check_version
+from .coders import HuggingFaceCoder
 
 from .dump import dump  # noqa: F401
 
@@ -589,7 +590,32 @@ def main(argv=None, input=None, output=None, force_git_root=None):
 
     main_model = models.Model.create(args.model, client)
 
-    try:
+
+    if main_model.name == "mistralai/Mixtral-8x7B-Instruct-v0.1":  # Replace with your Hugging Face model name
+        coder = HuggingFaceCoder(
+            main_model=main_model,
+            edit_format=args.edit_format,
+            io=io,
+            skip_model_availabily_check=args.skip_model_availability_check,
+            client=client,
+            ##
+            fnames=fnames,
+            git_dname=git_dname,
+            pretty=args.pretty,
+            show_diffs=args.show_diffs,
+            auto_commits=args.auto_commits,
+            dirty_commits=args.dirty_commits,
+            dry_run=args.dry_run,
+            map_tokens=args.map_tokens,
+            verbose=args.verbose,
+            assistant_output_color=args.assistant_output_color,
+            code_theme=args.code_theme,
+            stream=args.stream,
+            use_git=args.git,
+            voice_language=args.voice_language,
+            aider_ignore_file=args.aiderignore,
+        )
+    else:
         coder = Coder.create(
             main_model=main_model,
             edit_format=args.edit_format,
@@ -613,9 +639,35 @@ def main(argv=None, input=None, output=None, force_git_root=None):
             voice_language=args.voice_language,
             aider_ignore_file=args.aiderignore,
         )
-    except ValueError as err:
-        io.tool_error(str(err))
-        return 1
+    
+    
+    # try:
+    #     coder = Coder.create(
+            # main_model=main_model,
+            # edit_format=args.edit_format,
+            # io=io,
+            # skip_model_availabily_check=args.skip_model_availability_check,
+            # client=client,
+            # ##
+            # fnames=fnames,
+            # git_dname=git_dname,
+            # pretty=args.pretty,
+            # show_diffs=args.show_diffs,
+            # auto_commits=args.auto_commits,
+            # dirty_commits=args.dirty_commits,
+            # dry_run=args.dry_run,
+            # map_tokens=args.map_tokens,
+            # verbose=args.verbose,
+            # assistant_output_color=args.assistant_output_color,
+            # code_theme=args.code_theme,
+            # stream=args.stream,
+            # use_git=args.git,
+            # voice_language=args.voice_language,
+            # aider_ignore_file=args.aiderignore,
+    #     )
+    # except ValueError as err:
+    #     io.tool_error(str(err))
+    #     return 1
 
     if args.commit:
         coder.commands.cmd_commit("")
