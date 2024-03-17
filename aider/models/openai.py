@@ -2,6 +2,8 @@ from dataclasses import dataclass, fields
 
 import tiktoken
 
+from transformers import AutoTokenizer
+
 from aider.dump import dump  # noqa: F401
 
 from .model import Model
@@ -131,10 +133,11 @@ class OpenAIModel(Model):
     def __init__(self, name):
         true_name = openai_aliases.get(name, name)
 
-        try:
+        # Check if it's a Hugging Face model
+        if true_name.startswith("mistralai/"):
+            self.tokenizer = AutoTokenizer.from_pretrained(true_name)
+        else:
             self.tokenizer = tiktoken.encoding_for_model(true_name)
-        except KeyError:
-            raise ValueError(f"No known tokenizer for model: {name}")
 
         model_info = self.lookup_model_info(true_name)
         if not model_info:
@@ -157,3 +160,36 @@ class OpenAIModel(Model):
         for mi in openai_models:
             if mi.name == name:
                 return mi
+
+
+
+# class OpenAIModel(Model):
+#     def __init__(self, name):
+#         true_name = openai_aliases.get(name, name)
+
+#         try:
+#             self.tokenizer = tiktoken.encoding_for_model(true_name)
+#         except KeyError:
+#             raise ValueError(f"No known tokenizer for model: {name}")
+
+#         model_info = self.lookup_model_info(true_name)
+#         if not model_info:
+#             raise ValueError(f"Unsupported model: {name}")
+
+#         for field in fields(ModelInfo):
+#             val = getattr(model_info, field.name)
+#             setattr(self, field.name, val)
+
+#         # restore the caller's specified name
+#         self.name = name
+
+#         # set the history token limit
+#         if self.max_context_tokens < 32 * 1024:
+#             self.max_chat_history_tokens = 1024
+#         else:
+#             self.max_chat_history_tokens = 2 * 1024
+
+#     def lookup_model_info(self, name):
+#         for mi in openai_models:
+#             if mi.name == name:
+#                 return mi

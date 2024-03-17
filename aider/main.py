@@ -13,7 +13,7 @@ from aider.coders import Coder
 from aider.io import InputOutput
 from aider.repo import GitRepo
 from aider.versioncheck import check_version
-from .coders import HuggingFaceCoder
+from aider.coders.huggingface_coder import HuggingFaceCoder
 
 from .dump import dump  # noqa: F401
 
