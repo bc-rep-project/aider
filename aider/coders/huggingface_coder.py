@@ -17,10 +17,10 @@ class HuggingFaceCoder(Coder):
         
         self.gpt_prompts = HuggingFacePrompts()  # Add this line
 
-        super().__init__(*args, **filtered_kwargs)
-        model_id = AutoTokenizer  # Define the model_id
-        tokenizer = AutoTokenizer.from_pretrained(model_id.name)  # Create tokenizer instance
+        model_id = kwargs.get('main_model')  # Get the model_id from kwargs
+        tokenizer = AutoTokenizer.from_pretrained(model_id)  # Create tokenizer instance
         self.tokenizer = tokenizer  # Assign the instance to self.tokenizer
+        super().__init__(*args, **filtered_kwargs)
 
         # Load .env file
         load_dotenv()
