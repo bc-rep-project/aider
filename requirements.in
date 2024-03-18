@@ -24,3 +24,5 @@ Pillow
 diff-match-patch
 playwright
 pypandoc
+python-dotenv
+transformers

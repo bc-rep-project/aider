@@ -4,7 +4,7 @@ import requests
 from dotenv import load_dotenv
 import yaml
 from transformers import AutoTokenizer
-import tiktoken
+
 from .base_coder import Coder
 from .editblock_coder import find_original_update_blocks  # For parsing diffs
 from .huggingface_prompts import HuggingFacePrompts
@@ -19,7 +19,8 @@ class HuggingFaceCoder(Coder):
 
         super().__init__(*args, **filtered_kwargs)
         model_id = AutoTokenizer  # Define the model_id
-        self.tokenizer = tiktoken.get_encoding(model_id)  # Use AutoTokenizer
+        tokenizer = AutoTokenizer.from_pretrained(model_id.name)  # Create tokenizer instance
+        self.tokenizer = tokenizer  # Assign the instance to self.tokenizer
 
         # Load .env file
         load_dotenv()

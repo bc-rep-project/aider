@@ -145,3 +145,5 @@ urllib3==2.1.0
     # via requests
 wcwidth==0.2.12
     # via prompt-toolkit
+python-dotenv==1.0.1
+transformers==4.38.2
