@@ -287,8 +287,13 @@ class InputOutput:
     # OUTPUT
 
     def ai_output(self, content):
-        hist = "\n" + content.strip() + "\n\n"
-        self.append_chat_history(hist)
+        try:
+            if content.startswith("```"):  # Check if it's code
+                self.console.print(content, highlight=False)  # Print code without highlighting
+            else:
+                self.console.print("[bold blue]Output generated:[/]", content)  # Apply styling for other content
+        except Exception as e:
+            self.tool_error(f"Error formatting AI output: {e}")
 
     def confirm_ask(self, question, default="y"):
         self.num_user_asks += 1
