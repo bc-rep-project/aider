@@ -59,7 +59,7 @@ class HuggingFaceCoder(Coder):
         # Extract the generated text
         if isinstance(response_json, list):
             # Handle list response (extract text from the first dictionary element)
-            print(response.json())
+            # print(response.json())
             generated_text = response_json[0].get("generated_text")
         else:
             # Handle dictionary response (extract text directly)
