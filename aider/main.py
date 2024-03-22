@@ -145,6 +145,12 @@ def main(argv=None, input=None, output=None, force_git_root=None):
         config_file_parser_class=configargparse.YAMLConfigFileParser,
         auto_env_var_prefix="AIDER_",
     )
+    parser.add_argument(
+    "--huggingface-api-key",
+    metavar="HUGGINGFACE_API_KEY",
+    env_var="HUGGINGFACE_API_KEY",
+    help="Specify the Hugging Face API key",
+    )
 
     ##########
     core_group = parser.add_argument_group("Main")
@@ -545,7 +551,9 @@ def main(argv=None, input=None, output=None, force_git_root=None):
 
     def scrub_sensitive_info(text):
         # Replace sensitive information with placeholder
-        return text.replace(args.openai_api_key, "***")
+        if args.huggingface_api_key:  # Check if Hugging Face key is provided
+            text = text.replace(args.huggingface_api_key, "***")
+        return text
 
     if args.verbose:
         show = scrub_sensitive_info(parser.format_values())

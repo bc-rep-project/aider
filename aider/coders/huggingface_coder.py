@@ -31,10 +31,10 @@ class HuggingFaceCoder(Coder):
         api_key = os.getenv('HUGGINGFACE_API_KEY')
 
         # If the key doesn't exist in .env, try to load it from .yaml
-        # if api_key is None:
-        #     with open('config.yaml', 'r') as f:
-        #         config = yaml.safe_load(f)
-        #         api_key = config.get('HUGGINGFACE_API_KEY')
+        if api_key is None:
+            with open('config.yaml', 'r') as f:
+                config = yaml.safe_load(f)
+                api_key = config.get('HUGGINGFACE_API_KEY')
 
         # Hugging Face API URL and headers
         self.api_url = "https://api-inference.huggingface.co/models/mistralai/Mixtral-8x7B-Instruct-v0.1"
