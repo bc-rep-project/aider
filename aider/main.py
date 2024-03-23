@@ -602,7 +602,7 @@ def main(argv=None, input=None, output=None, force_git_root=None):
     main_model = models.Model.create(args.model, client)
 
 
-    if main_model.name == "mistralai/Mixtral-8x7B-Instruct-v0.1":  # Replace with your Hugging Face model name
+    if args.huggingface_api_key:
         coder = HuggingFaceCoder(
             main_model=main_model,
             edit_format=args.edit_format,
