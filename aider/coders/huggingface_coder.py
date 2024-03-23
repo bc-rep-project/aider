@@ -9,6 +9,8 @@ from .base_coder import Coder
 from .editblock_coder import find_original_update_blocks  # For parsing diffs
 from .huggingface_prompts import HuggingFacePrompts
 from .editblock_coder import do_replace
+from json import JSONDecodeError
+
 
 
 class HuggingFaceCoder(Coder):
