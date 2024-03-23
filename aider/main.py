@@ -551,9 +551,12 @@ def main(argv=None, input=None, output=None, force_git_root=None):
 
     def scrub_sensitive_info(text):
         # Replace sensitive information with placeholder
-        if args.huggingface_api_key:
+        if args.huggingface_api_key:  # Check if Hugging Face key is provided
             text = text.replace(args.huggingface_api_key, "***")
-        return text or ""  # Return empty string if text is None
+        if args.openai_api_key:  # Check if OpenAI key is provided
+            text = text.replace(args.openai_api_key, "***")
+        return text
+
 
     if args.verbose:
         show = scrub_sensitive_info(parser.format_values())
