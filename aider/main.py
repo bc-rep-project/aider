@@ -145,12 +145,6 @@ def main(argv=None, input=None, output=None, force_git_root=None):
         config_file_parser_class=configargparse.YAMLConfigFileParser,
         auto_env_var_prefix="AIDER_",
     )
-    parser.add_argument(
-    "--huggingface-api-key",
-    metavar="HUGGINGFACE_API_KEY",
-    env_var="HUGGINGFACE_API_KEY",
-    help="Specify the Hugging Face API key",
-    )
 
     ##########
     core_group = parser.add_argument_group("Main")
@@ -172,6 +166,12 @@ def main(argv=None, input=None, output=None, force_git_root=None):
         metavar="MODEL",
         default=default_model,
         help=f"Specify the model to use for the main chat (default: {default_model})",
+    )
+    core_group.add_argument(
+        "--huggingface-api-key",
+        metavar="HUGGINGFACE_API_KEY",
+        env_var="HUGGINGFACE_API_KEY",
+        help="Specify the Hugging Face API key",
     )
     core_group.add_argument(
         "--skip-model-availability-check",
@@ -551,9 +551,9 @@ def main(argv=None, input=None, output=None, force_git_root=None):
 
     def scrub_sensitive_info(text):
         # Replace sensitive information with placeholder
-        if args.huggingface_api_key:  # Check if Hugging Face key is provided
+        if args.huggingface_api_key:
             text = text.replace(args.huggingface_api_key, "***")
-        return text
+        return text or ""  # Return empty string if text is None
 
     if args.verbose:
         show = scrub_sensitive_info(parser.format_values())
