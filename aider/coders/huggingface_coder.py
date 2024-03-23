@@ -123,7 +123,25 @@ class HuggingFaceCoder(Coder):
         # Extract code edits from the model's response
         edits = []  # Initialize an empty list to store edits
 
-        # ... (Add your logic here to extract edits from response_json)
+        # Check if the response contains code edits in Mixtral's format
+        if "<!-- Mixtral edits -->" in self.partial_response_content:
+            # Extract edits using Mixtral's format (replace this with your parsing logic)
+            # For example, if Mixtral uses a custom JSON format:
+            try:
+                edits_json = json.loads(self.partial_response_content.split("<!-- Mixtral edits -->")[1])
+                for edit in edits_json:
+                    path = edit.get("path")
+                    original = edit.get("original")
+                    updated = edit.get("updated")
+                    edits.append((path, original, updated))
+            except (JSONDecodeError, IndexError):
+                raise ValueError("Malformed Mixtral edits format")
+        else:
+            # Handle other cases or raise an error
+            if "```diff" in self.partial_response_content:  # Check for unified diff format
+                edits = list(find_original_update_blocks(self.partial_response_content))
+            else:
+                raise ValueError("Unsupported edit format")
 
         return edits  # Return the extracted edits
     
