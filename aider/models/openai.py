@@ -107,7 +107,7 @@ openai_models = [
     ),
     ModelInfo(
         "mistralai/Mixtral-8x7B-Instruct-v0.1",  # Model name
-        8192,  # Max context tokens (adjust as needed)
+        16384,  # Max context tokens (adjust as needed)
         0.0,  # Prompt price (if applicable)
         0.0,  # Completion price (if applicable)
         "diff",  # Edit format (adjust as needed)

@@ -5,6 +5,7 @@ from .single_wholefile_func_coder import SingleWholeFileFunctionCoder
 from .udiff_coder import UnifiedDiffCoder
 from .wholefile_coder import WholeFileCoder
 from .wholefile_func_coder import WholeFileFunctionCoder
+from .huggingface_coder import HuggingFaceCoder
 
 __all__ = [
     Coder,
@@ -14,4 +15,5 @@ __all__ = [
     EditBlockFunctionCoder,
     SingleWholeFileFunctionCoder,
     UnifiedDiffCoder,
+    HuggingFaceCoder,
 ]

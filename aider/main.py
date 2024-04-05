@@ -168,12 +168,6 @@ def main(argv=None, input=None, output=None, force_git_root=None):
         help=f"Specify the model to use for the main chat (default: {default_model})",
     )
     core_group.add_argument(
-        "--huggingface-api-key",
-        metavar="HUGGINGFACE_API_KEY",
-        env_var="HUGGINGFACE_API_KEY",
-        help="Specify the Hugging Face API key",
-    )
-    core_group.add_argument(
         "--skip-model-availability-check",
         metavar="SKIP_MODEL_AVAILABILITY_CHECK",
         default=False,
@@ -470,6 +464,12 @@ def main(argv=None, input=None, output=None, force_git_root=None):
             "Specify the config file (default: search for .aider.conf.yml in git root, cwd"
             " or home directory)"
         ),
+    )
+    other_group.add_argument(
+        "--huggingface-api-key",
+        metavar="HUGGINGFACE_API_KEY",
+        env_var="HUGGINGFACE_API_KEY",
+        help="Specify the Hugging Face API key",
     )
 
     args = parser.parse_args(argv)

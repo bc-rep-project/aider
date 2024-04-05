@@ -25,6 +25,7 @@ from aider.repo import GitRepo
 from aider.repomap import RepoMap
 from aider.sendchat import send_with_retries
 from aider.utils import is_image_file
+# from .huggingface_coder import HuggingFaceCoder
 
 from ..dump import dump  # noqa: F401
 
@@ -67,6 +68,9 @@ class Coder:
         **kwargs,
     ):
         from . import EditBlockCoder, UnifiedDiffCoder, WholeFileCoder
+
+        # if main_model.name.startswith("mistralai/"):  # Check if it's a Hugging Face model
+        #     return HuggingFaceCoder(client, main_model, io, **kwargs)
 
         if not main_model:
             main_model = models.GPT4
