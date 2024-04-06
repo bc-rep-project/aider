@@ -358,16 +358,30 @@ class HuggingFaceCoder(Coder):
         self.partial_response_content = ""
         self.partial_response_function_call = dict()
 
-        # Filter out specific assistant responses
-        def filter_messages(message):
-            if message['role'] == 'assistant' and message['content'].strip() == 'Ok.':
-                return False
-            return True
 
-        filtered_messages = list(filter(filter_messages, messages)) 
+        # Separate user and assistant messages
+        user_messages = [msg for msg in messages if msg['role'] == 'user']
+        assistant_messages = [msg for msg in messages if msg['role'] == 'assistant']
 
-        # Format the prompt for the Hugging Face model
-        prompt = self.format_prompt(filtered_messages)
+        # Create the prompt with system prompts and user messages
+        prompt = ""
+        prompt += self.fmt_system_prompt(self.gpt_prompts.main_system) + "\n"
+        prompt += self.fmt_system_prompt(self.gpt_prompts.system_reminder) + "\n"
+        prompt += self.format_prompt(user_messages) 
+
+        # # Filter out specific assistant responses
+        # def filter_messages(message):
+        #     if message['role'] == 'assistant' and message['content'].strip() == 'Ok.':
+        #         return False
+        #     return True
+
+        # filtered_messages = list(filter(filter_messages, messages)) 
+
+        # # Format the prompt for the Hugging Face model
+        # prompt = self.format_prompt(filtered_messages)
+
+
+
 
         # # Filter out system prompts before sending:
         # messages_to_send = [msg for msg in messages if msg['role'] != 'system']
@@ -376,7 +390,7 @@ class HuggingFaceCoder(Coder):
         # prompt = self.format_prompt(messages_to_send)
 
         # Send the request to the Hugging Face API
-        response = requests.post(self.api_url, headers=self.headers, json={"inputs": prompt})
+        response = requests.post(self.api_url, headers=self.headers, json={"inputs": prompt, "parameters": {"max_length": 16384}})
         
         # Parse the JSON response
         response_json = response.json()
