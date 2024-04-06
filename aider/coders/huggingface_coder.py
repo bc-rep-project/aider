@@ -310,11 +310,10 @@
 #------------------------------------
 
 
-import os
+
 import json
 import requests
 from dotenv import load_dotenv
-import yaml
 import re
 from transformers import AutoTokenizer
 from .shared_utils import find_original_update_blocks  # For parsing diffs
@@ -346,13 +345,7 @@ class HuggingFaceCoder(Coder):
         # super().__init__(self, *args, **kwargs)
         self.partial_response_function_call = {}
 
-        # Load API key from .env or .yaml
-        load_dotenv()
-        api_key = os.getenv('HUGGINGFACE_API_KEY')
-        if api_key is None:
-            with open('config.yaml', 'r') as f:
-                config = yaml.safe_load(f)
-                api_key = config.get('HUGGINGFACE_API_KEY')
+        api_key = kwargs.get('huggingface_api_key')
 
         # Hugging Face API URL and headers
         self.api_url = "https://api-inference.huggingface.co/models/mistralai/Mixtral-8x7B-Instruct-v0.1"
@@ -365,12 +358,26 @@ class HuggingFaceCoder(Coder):
         self.partial_response_content = ""
         self.partial_response_function_call = dict()
 
+        # Filter out specific assistant responses
+        def filter_messages(message):
+            if message['role'] == 'assistant' and message['content'].strip() == 'Ok.':
+                return False
+            return True
+
+        filtered_messages = list(filter(filter_messages, messages)) 
+
         # Format the prompt for the Hugging Face model
-        prompt = self.format_prompt(messages)
+        prompt = self.format_prompt(filtered_messages)
+
+        # # Filter out system prompts before sending:
+        # messages_to_send = [msg for msg in messages if msg['role'] != 'system']
+
+        # # Format the prompt for the Hugging Face model
+        # prompt = self.format_prompt(messages_to_send)
 
         # Send the request to the Hugging Face API
         response = requests.post(self.api_url, headers=self.headers, json={"inputs": prompt})
-
+        
         # Parse the JSON response
         response_json = response.json()
 
@@ -427,13 +434,17 @@ class HuggingFaceCoder(Coder):
         for path, original, updated in edits:
             full_path = self.abs_root_path(path)
             content = self.io.read_text(full_path)
-            content = do_replace(full_path, content, original, updated, self.fence)
+            try:
+                content = do_replace(full_path, content, original, updated, self.fence)
+            except ValueError as err:
+                # Handle ValueError specifically, potentially providing feedback or logging
+                self.io.tool_error(err.args[0])  # Print the error message
+                continue  # Move on to the next edit
+
             if content:
                 self.io.write_text(full_path, content)
                 continue
-            raise ValueError(
-                f"InvalidEditBlock: edit failed!\n\n{path} does not contain the *exact chunk* of SEARCH lines you specified."
-            )
+            self.io.tool_error(f"Failed to apply edit to {path}")
 
     def format_prompt(self, messages):
         # Format the messages into a single prompt string
@@ -444,15 +455,3 @@ class HuggingFaceCoder(Coder):
             if content:
                 prompt += f"{role}: {content}\n"
         return prompt
-
-    def update_files(self):
-        # from .base_coder import Coder  # Lazy import of Coder
-
-        edits = self.get_edits()
-        edits = self.prepare_to_edit(edits)
-
-        if isinstance(self, Coder):  # Check if it's a Coder subclass
-            edited_files = self.apply_updates()  # Call apply_updates for HuggingFaceCoder
-        else:
-            self.apply_edits(edits)  # Apply edits for other coder classes
-        return edited_files  # Return the edited files

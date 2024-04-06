@@ -333,6 +333,8 @@ class InputOutput:
 
     def tool_error(self, message):
         self.num_error_outputs += 1
+        # import pdb; pdb.set_trace()  # Set a breakpoint here
+        # self.console.print(message, **style)
 
         if message.strip():
             hist = f"{message.strip()}"

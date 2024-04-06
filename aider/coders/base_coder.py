@@ -25,7 +25,7 @@ from aider.repo import GitRepo
 from aider.repomap import RepoMap
 from aider.sendchat import send_with_retries
 from aider.utils import is_image_file
-from .huggingface_coder import HuggingFaceCoder
+
 
 from ..dump import dump  # noqa: F401
 
@@ -68,9 +68,6 @@ class Coder:
         **kwargs,
     ):
         from . import EditBlockCoder, UnifiedDiffCoder, WholeFileCoder
-
-        if main_model.name == 'mistralai/Mixtral-8x7B-Instruct-v0.1':
-            return HuggingFaceCoder(client, main_model, io, **kwargs)
 
         if not main_model:
             main_model = models.GPT4
@@ -942,6 +939,7 @@ class Coder:
 
     def update_files(self):
         edits = self.get_edits()
+        # import pdb; pdb.set_trace()  # Set a breakpoint here
         edits = self.prepare_to_edit(edits)
         self.apply_edits(edits)
         return set(edit[0] for edit in edits)
@@ -950,30 +948,44 @@ class Coder:
         try:
             edited = self.update_files()
         except ValueError as err:
+            # Handle ValueError specifically, potentially retrying or logging
             self.num_malformed_responses += 1
             err = err.args[0]
             self.apply_update_errors += 1
             if self.apply_update_errors < self.max_apply_update_errors:
-                self.io.tool_error(f"Malformed response #{self.apply_update_errors}, retrying...")
-                self.io.tool_error("https://aider.chat/docs/faq.html#aider-isnt-editing-my-files")
+                self.io.tool_error(
+                    f"Malformed response #{self.apply_update_errors}, retrying..."
+                )
+                self.io.tool_error(
+                    "https://aider.chat/docs/faq.html#aider-isnt-editing-my-files"
+                )
                 self.io.tool_error(str(err))
                 return None, err
             else:
-                self.io.tool_error(f"Malformed response #{self.apply_update_errors}, aborting.")
-                self.io.tool_error("https://aider.chat/docs/faq.html#aider-isnt-editing-my-files")
+                self.io.tool_error(
+                    f"Malformed response #{self.apply_update_errors}, aborting."
+                )
+                self.io.tool_error(
+                    "https://aider.chat/docs/faq.html#aider-isnt-editing-my-files"
+                )
                 self.io.tool_error(str(err))
                 return False, None
 
         except git.exc.GitCommandError as err:
+            # Handle GitCommandError specifically, potentially logging or providing feedback
             self.io.tool_error(str(err))
             return False, None
-        except Exception as err:
+
+        except Exception as err:  # Catch other exceptions for logging and debugging
             print(err)
             print()
+            # import pdb; pdb.set_trace()  # Set a breakpoint here
             traceback.print_exc()
             self.apply_update_errors += 1
             if self.apply_update_errors < self.max_apply_update_errors:
-                self.io.tool_error(f"Update exception #{self.apply_update_errors}, retrying...")
+                self.io.tool_error(
+                    f"Update exception #{self.apply_update_errors}, retrying..."
+                )
                 self.io.tool_error(str(err))
                 return None, str(err)
             else:
