@@ -344,6 +344,7 @@ class HuggingFaceCoder(Coder):
         self.tokenizer = tokenizer
         # super().__init__(self, *args, **kwargs)
         self.partial_response_function_call = {}
+        self.hide_assistant_response = False  # Add this line
 
         api_key = kwargs.get('huggingface_api_key')
 
@@ -389,6 +390,9 @@ class HuggingFaceCoder(Coder):
         # # Format the prompt for the Hugging Face model
         # prompt = self.format_prompt(messages_to_send)
 
+        # Hide assistant response for this specific interaction
+        self.hide_assistant_response = True
+
         # Send the request to the Hugging Face API
         response = requests.post(self.api_url, headers=self.headers, json={"inputs": prompt, "parameters": {"max_length": 16384}})
         
@@ -417,6 +421,9 @@ class HuggingFaceCoder(Coder):
                 edited_files = self.update_files()  # Get the edited files (should be a set)
                 if edited_files:
                     self.apply_updates(edited_files)  # Call apply_updates instead of apply_edits
+
+        # Reset the flag
+        self.hide_assistant_response = False
 
     def get_edits(self):
         # Extract code edits from the model's response
@@ -469,3 +476,17 @@ class HuggingFaceCoder(Coder):
             if content:
                 prompt += f"{role}: {content}\n"
         return prompt
+
+
+    def ai_output(self, content):
+        if not self.hide_assistant_response:  # Check the flag before printing
+            # Existing code to print content:
+            try:
+                if content.startswith("```"):  # Check if it's code
+                    self.console.print(content, highlight=False)  # Print code without highlighting
+                else:
+                    self.console.print(
+                        "[bold blue]Output generated:[/]", content
+                    )  # Apply styling for other content
+            except Exception as e:
+                self.tool_error(f"Error formatting AI output: {e}")

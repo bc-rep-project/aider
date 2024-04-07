@@ -367,3 +367,11 @@ class InputOutput:
         if self.chat_history_file is not None:
             with self.chat_history_file.open("a", encoding=self.encoding) as f:
                 f.write(text)
+
+# class HuggingFaceInputOutput(InputOutput):
+#     # ... other methods ...
+
+#     def ai_output(self, content):
+#         # Filter out system prompts and initial self-introduction
+#         if not content.startswith("SYSTEM: ") and not content.startswith("I am an AI language model"):
+#             super().ai_output(content)
