@@ -69,10 +69,12 @@ class HuggingFaceCoder(Coder):
         else:
             generated_text = response_json.get("generated_text")
 
+        prompt_to_hide = "Act as an expert software developer, specifically trained on the Mixtral model."
+
         # Check if the response starts with "ASSISTANT:"
-        if generated_text and generated_text.startswith("ASSISTANT:"):
-            # If it does, extract the content after the prefix
-            self.partial_response_content = generated_text[len("ASSISTANT:") + 1:].strip() 
+        if generated_text and generated_text.startswith(prompt_to_hide):
+            # If it does, remove the prompt from the generated_text
+            generated_text = generated_text[len(prompt_to_hide):].strip()
         else:
             # Otherwise, keep the full generated text
             self.partial_response_content = generated_text
