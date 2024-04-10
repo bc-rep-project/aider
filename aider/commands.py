@@ -337,6 +337,10 @@ class Commands:
 
         filenames = parse_quoted_filenames(args)
         for word in filenames:
+            if word is None or self.coder.root is None:
+                self.io.tool_error("Root directory is None.")
+                continue
+
             if Path(word).is_absolute():
                 fname = Path(word)
             else:
@@ -349,7 +353,6 @@ class Commands:
             if fname.exists() and fname.is_file():
                 all_matched_files.add(str(fname))
                 continue
-                # an existing dir will fall through and get recursed by glob
 
             matched_files = self.glob_filtered_to_repo(word)
             if matched_files:
@@ -392,12 +395,82 @@ class Commands:
         if not added_fnames:
             return
 
-        # only reply if there's been some chatting since the last edit
         if not self.coder.cur_messages:
             return
 
         reply = prompts.added_files.format(fnames=", ".join(added_fnames))
         return reply
+
+    # def cmd_add(self, args):
+    #     "Add files to the chat so GPT can edit them or review them in detail"
+
+    #     added_fnames = []
+
+    #     all_matched_files = set()
+
+    #     filenames = parse_quoted_filenames(args)
+    #     for word in filenames:
+    #         if Path(word).is_absolute():
+    #             fname = Path(word)
+    #         else:
+    #             fname = Path(self.coder.root) / word
+
+    #         if self.coder.repo and self.coder.repo.ignored_file(fname):
+    #             self.io.tool_error(f"Skipping {fname} that matches aiderignore spec.")
+    #             continue
+
+    #         if fname.exists() and fname.is_file():
+    #             all_matched_files.add(str(fname))
+    #             continue
+    #             # an existing dir will fall through and get recursed by glob
+
+    #         matched_files = self.glob_filtered_to_repo(word)
+    #         if matched_files:
+    #             all_matched_files.update(matched_files)
+    #             continue
+
+    #         if self.io.confirm_ask(f"No files matched '{word}'. Do you want to create {fname}?"):
+    #             fname.touch()
+    #             all_matched_files.add(str(fname))
+
+    #     for matched_file in all_matched_files:
+    #         abs_file_path = self.coder.abs_root_path(matched_file)
+
+    #         if not abs_file_path.startswith(self.coder.root):
+    #             self.io.tool_error(
+    #                 f"Can not add {abs_file_path}, which is not within {self.coder.root}"
+    #             )
+    #             continue
+
+    #         if abs_file_path in self.coder.abs_fnames:
+    #             self.io.tool_error(f"{matched_file} is already in the chat")
+    #         else:
+    #             if is_image_file(matched_file) and not is_gpt4_with_openai_base_url(
+    #                 self.coder.main_model.name, self.coder.client
+    #             ):
+    #                 self.io.tool_error(
+    #                     f"Cannot add image file {matched_file} as the model does not support image"
+    #                     " files"
+    #                 )
+    #                 continue
+    #             content = self.io.read_text(abs_file_path)
+    #             if content is None:
+    #                 self.io.tool_error(f"Unable to read {matched_file}")
+    #             else:
+    #                 self.coder.abs_fnames.add(abs_file_path)
+    #                 self.io.tool_output(f"Added {matched_file} to the chat")
+    #                 self.coder.check_added_files()
+    #                 added_fnames.append(matched_file)
+
+    #     if not added_fnames:
+    #         return
+
+    #     # only reply if there's been some chatting since the last edit
+    #     if not self.coder.cur_messages:
+    #         return
+
+    #     reply = prompts.added_files.format(fnames=", ".join(added_fnames))
+    #     return reply
 
     def completions_drop(self, partial):
         files = self.coder.get_inchat_relative_files()
