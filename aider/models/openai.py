@@ -5,6 +5,9 @@ import tiktoken
 from aider.dump import dump  # noqa: F401
 
 from .model import Model
+from .openai import OpenAIModel
+from .openrouter import OpenRouterModel
+from coders.huggingface_coder import HuggingFaceCoder  # Assuming the file is in the coders directory
 
 
 @dataclass
@@ -125,6 +128,49 @@ openai_aliases = {
     "gpt-4-32k": "gpt-4-32k-0613",
 }
 
+# Add information for the Hugging Face model:
+huggingface_models = [
+    ModelInfo(
+        name="mistralai/Mixtral-8x7B-Instruct-v0.1", 
+        max_context_tokens=16384,  # Replace with actual value
+        prompt_price=0.0,  # Replace with actual value or leave as 0.0
+        completion_price=0.0,  # Replace with actual value or leave as 0.0
+        edit_format="whole", # Adapt to your chosen edit format
+        always_available=True, 
+    )
+]
+
+
+class Model:
+    name = None
+    edit_format = None
+    max_context_tokens = 0
+    tokenizer = None
+    max_chat_history_tokens = 1024
+
+    always_available = False
+    use_repo_map = False
+    send_undo_reply = False
+
+    prompt_price = None
+    completion_price = None
+
+    @classmethod
+    def create(cls, name, client=None):
+        """
+        Creates an instance of the appropriate coder class based on the model name.
+        """
+        if client and client.base_url.host == "openrouter.ai":
+            return OpenRouterModel(client, name)
+        elif name in [model.name for model in openai_models]:
+            return OpenAIModel(name)
+        elif name in [model.name for model in huggingface_models]:
+            return OpenAIModel.create_huggingface_model(name)
+        else:
+            raise ValueError(f"invalid model: {name}")
+
+    # ... other methods of the Model class ...
+
 
 class OpenAIModel(Model):
     def __init__(self, name):
@@ -156,3 +202,18 @@ class OpenAIModel(Model):
         for mi in openai_models:
             if mi.name == name:
                 return mi
+    
+    @classmethod
+    def create_huggingface_model(cls, name):
+        """
+        Creates an instance of HuggingFaceCoder for the specified model name.
+        """
+        for model_info in huggingface_models:
+            if model_info.name == name:
+                return HuggingFaceCoder(
+                    client=None,  # No OpenAI client needed
+                    main_model=model_info,
+                    io=None,  # Pass an InputOutput instance if needed
+                    # ... other arguments as needed ...
+                )
+        raise ValueError(f"Unsupported Hugging Face model: {name}")
